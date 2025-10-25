@@ -87,7 +87,7 @@ pipeline {
       }
       steps {
         echo "Triggering deployment job for environment: ${params.ENVIRONMENT}"
-        build job: 'Backend-cd', parameters: [string(name: 'version', value: "${env.appVersion}"), string(name: 'ENVIRONMENT', value: "${params.ENVIRONMENT}")], wait: true      
+        build job: 'Backend-CD', parameters: [string(name: 'version', value: "${env.appVersion}"), string(name: 'ENVIRONMENT', value: "${params.ENVIRONMENT}")], wait: true      
       }
     }
   }
