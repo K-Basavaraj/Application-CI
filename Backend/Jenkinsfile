@@ -15,7 +15,6 @@ pipeline {
     region = 'us-east-1'
     account_id = '688567303455'
     project = 'expense'
-    env_name = ''
     component = 'backend'
   }
 
@@ -43,10 +42,8 @@ pipeline {
     stage('Initialize Environment') {
       steps {
         script {
-          // Copy the selected Jenkins parameter (ENVIRONMENT) into a global environment variable (env_name)
          // This allows us to use the selected environment in all stages (Docker build, deploy, etc.)
-          env.env_name = params.ENVIRONMENT
-          echo "Selected environment: ${env.env_name}"
+          echo "Selected environment: ${params.ENVIRONMENT}"
         }
       }
     }
@@ -63,15 +60,23 @@ pipeline {
       steps {
         withAWS(region: 'us-east-1', credentials: 'aws-creds'){
           dir('Backend'){
-            sh """
-              aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${account_id}.dkr.ecr.us-east-1.amazonaws.com
-           
-              docker build -t ${account_id}.dkr.ecr.us-east-1.amazonaws.com/${project}/${env.env_name}/${component}:${env.appVersion} .
+            script {
+              def repo = "${account_id}.dkr.ecr.${region}.amazonaws.com/${project}/${params.ENVIRONMENT}/${component}:${env.appVersion}"
+              sh """
+                  echo "Logging into ECR..."
+                  aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${account_id}.dkr.ecr.${region}.amazonaws.com
+
+                  echo "Building Docker image: ${repo}"
+                  docker build -t ${repo} .
  
-              docker images
+                  docker images
  
-              docker push ${account_id}.dkr.ecr.us-east-1.amazonaws.com/${project}/${env.env_name}/${component}:${env.appVersion}
-            """
+                  echo "Pushing image to ECR..."
+                  docker push ${repo}
+
+                  echo "Docker image successfully pushed to ${repo}"
+              """
+            }
           }
         }
       }
@@ -81,7 +86,8 @@ pipeline {
         expression { params.deploy }
       }
       steps {
-        build job: 'Backend-cd', parameters: [string(name: 'version', value: "${env.appVersion}"),string(name: 'ENVIRONMENT', value: "${env.env_name}")], wait: true      
+        echo "Triggering deployment job for environment: ${params.ENVIRONMENT}"
+        build job: 'Backend-cd', parameters: [string(name: 'version', value: "${env.appVersion}"), string(name: 'ENVIRONMENT', value: "${params.ENVIRONMENT}")], wait: true      
       }
     }
   }
