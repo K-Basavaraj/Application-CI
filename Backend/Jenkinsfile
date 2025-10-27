@@ -1,8 +1,8 @@
 @Library('jenkins-shared-library') _   //get the global pipeline libraries in system config
 
 def configMap = [
-    project = 'expense',
-    component = 'backend'
+    project: 'expense',
+    component: 'backend'
 ]
 
 if( ! env.BRANCH_NAME.equalsIgnoreCase('main')){ // true, if branch is feature branch
