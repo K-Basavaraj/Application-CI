@@ -6,6 +6,7 @@ This repository contains the Continuous Integration (CI) pipeline for the Expens
     * Create a Docker image
     * Push the image to Amazon ECR
     * Optionally trigger the CD pipeline for deployment
+    
 Deployment logic is intentionally separated into a different repository (CD) to keep responsibilities clean and manageable.
 
 ---
