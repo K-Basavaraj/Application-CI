@@ -4,14 +4,14 @@ pipeline {
     label 'AGENT-1'
   }
   options {
-    // Fail the build if it runs longer than 5 minutes
-    timeout(time: 5, unit: 'MINUTES')
-
-    // Prevent multiple builds from running at the same time
-    disableConcurrentBuilds()
+    timeout(time: 5, unit: 'MINUTES')  // Fail the build if it runs longer than 5 minutes
+    disableConcurrentBuilds() // Prevent multiple builds from running at the same time (or)Prevent parallel runs of same job
   }
+  // Parameters shown when triggering the CI job manually
   parameters {
-    // CI does NOT take environment input. This flag only decides whether to trigger CD after build.
+    // Only one control here:
+    // deploy = false → only build & push image
+    // deploy = true  → build, push, AND trigger CD pipeline
     booleanParam(name: 'deploy', defaultValue: false, description: 'select to deploy or not')
   }
   environment {
@@ -82,10 +82,16 @@ pipeline {
       steps {
         // CI automatically deploys ONLY to DEV
         // QA / PROD deployments are triggered manually from CD
+         /*
+         CI → CD CONNECTION HAPPENS HERE
+         We pass TWO VALUES to CD:
+         1. version     : Docker image tag
+         2. ENVIRONMENT : target environment
+        */
         build job: 'Backend-CD', parameters: [
            string(name: 'version', value: "${env.appVersion}"),
            string(name: 'ENVIRONMENT', value: "dev"),
-        ], wait: true  
+        ], wait: true   
       }
     }
   }
