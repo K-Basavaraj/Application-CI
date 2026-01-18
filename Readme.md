@@ -6,8 +6,8 @@ This repository contains the Continuous Integration (CI) pipeline for the Expens
     * Create a Docker image
     * Push the image to Amazon ECR
     * Optionally trigger the CD pipeline for deployment
-
 Deployment logic is intentionally separated into a different repository (CD) to keep responsibilities clean and manageable.
+
 ---
 ## CI Pipeline Responsibilities
 ```
@@ -88,8 +88,8 @@ When deployment is enabled: CI triggers Backend-CD job
 * Application version
 * Target environment (dev)
 
-**CD pipeline then:**
-Pulls the exact image and Deploys it to Kubernetes using Helm
+CD pipeline then: Pulls the exact image and Deploys it to Kubernetes using Helm
+
 ---
 ## Typical Usage Scenarios
 
